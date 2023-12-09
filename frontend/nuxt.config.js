@@ -45,9 +45,14 @@ export default {
   build: {
   },
 
-   // Vuetify module configuration
-   vuetify: {
+  // Vuetify module configuration
+  vuetify: {
     // customVariables: ['~/assets/variables.scss'],
     // theme: { ... }
+  },
+
+  axios: {
+    // Axios module configuration
+    baseURL: 'http://localhost:4200/api', // Replace with your API base URL
   },
 }
