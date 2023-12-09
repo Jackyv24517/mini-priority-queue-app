@@ -1,4 +1,5 @@
 <template>
+    <v-app data-app>
     <v-container>
       <v-card>
         <v-card-title class="headline">Login</v-card-title>
@@ -19,7 +20,8 @@
           </v-form>
         </v-card-text>
       </v-card>
-    </v-container>
+    </v-container>        
+    </v-app>
   </template>
   
   <script>

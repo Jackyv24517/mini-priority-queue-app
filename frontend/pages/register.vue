@@ -62,9 +62,9 @@
           role: this.role,
         });
 
-        // Handle the response from the backend (e.g., show success message, redirect, etc.)
-        console.log('Registration successful', response.data);
+        // redirect to the login page upon successful registration
         this.$router.push('/login');
+        console.log('Registration successful', response.data);
       } catch (error) {
         // Handle any errors from the API call (e.g., show error message)
         console.error('Registration failed', error.response.data);
