@@ -50,7 +50,9 @@ const register = async (req, res) => {
         roles: user.roles
       }, process.env.JWT_SECRET, { expiresIn: '1h' });
       
-      res.status(201).send({ token });
+      //instead of auto login after successful registation
+      //res.status(201).send({ token });
+      res.status(201).send('User registered successfully');
     } catch (error) {
       res.status(500).send('Error registering new user');
     }
