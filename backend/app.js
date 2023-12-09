@@ -19,7 +19,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('Could not connect to MongoDB Atlas', err));
 
-app.use('/api/auth', authRoutes);
+  app.use('/api/auth', authRoutes);
 
 const port = process.env.PORT || 3200;
 app.listen(port, () => {
