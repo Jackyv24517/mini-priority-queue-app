@@ -47,4 +47,4 @@ const register = async (req, res) => {
     }
   };
 
-module.exports = { login, register  };
+module.exports = { login, register };
