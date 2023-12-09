@@ -53,10 +53,23 @@
       };
     },
     methods: {
-      registerUser() {
-        // Implement the registration logic here
-        // Make sure to include the 'role' in the data sent to the backend
-      },
+      async registerUser() {
+      try {
+        // Make the API call to the backend registration endpoint
+        const response = await this.$axios.post('/auth/register', {
+          username: this.username,
+          password: this.password,
+          role: this.role,
+        });
+
+        // Handle the response from the backend (e.g., show success message, redirect, etc.)
+        console.log('Registration successful', response.data);
+        this.$router.push('/login');
+      } catch (error) {
+        // Handle any errors from the API call (e.g., show error message)
+        console.error('Registration failed', error.response.data);
+      }
+    },
       gotoLogin() {
         this.$router.push('/login');
       }
