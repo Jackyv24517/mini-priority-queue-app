@@ -23,7 +23,7 @@ const login = async (req, res) => {
 //user register
 const register = async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { username, password, roles } = req.body; // Include 'roles' in the destructuring
   
       // Check if user already exists
       const existingUser = await User.findOne({ username });
@@ -35,16 +35,26 @@ const register = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(password, salt);
   
-      // Create a new user
-      const user = new User({ username, passwordHash });
+      // Create a new user with roles
+      // Ensure roles are assigned appropriately, whether default or from the request
+      const user = new User({
+        username,
+        passwordHash,
+        roles: roles || ['User'] // Default role to 'User' if not provided
+      });
       await user.save();
   
-      // Optionally, automatically log in the user after registration
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      // Create a token that includes the roles in its payload
+      const token = jwt.sign({
+        _id: user._id,
+        roles: user.roles
+      }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      
       res.status(201).send({ token });
     } catch (error) {
       res.status(500).send('Error registering new user');
     }
-  };
+};
+
 
 module.exports = { login, register };
