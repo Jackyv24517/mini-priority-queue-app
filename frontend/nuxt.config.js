@@ -43,5 +43,11 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-  }
+  },
+
+   // Vuetify module configuration
+   vuetify: {
+    // customVariables: ['~/assets/variables.scss'],
+    // theme: { ... }
+  },
 }
