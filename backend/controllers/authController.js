@@ -12,7 +12,14 @@ const login = async (req, res) => {
       return res.status(401).send('Invalid username or password');
     }
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { 
+        _id: user._id, 
+        role: user.role  // Add the role here
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
     res.send({ token });
   } catch (error) {
     res.status(500).send('An error occurred');
