@@ -1,11 +1,17 @@
 require('dotenv').config();
 
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 app.use(express.json());
+
+// CORS configuration
+app.use(cors({
+    origin: 'http://localhost:3000' // permitted frontend URL
+  }));
 
 //connection cred var
 const username = encodeURIComponent(process.env.DB_USERNAME);
