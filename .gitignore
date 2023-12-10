@@ -83,3 +83,7 @@ public
 
 # FuseBox cache
 .fusebox/
+
+# vscode settings
+*.vscode
+package-lock.json
