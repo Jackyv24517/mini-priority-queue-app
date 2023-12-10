@@ -1,17 +1,21 @@
 <template>
   <div>
-    <h1>Welcome to the Dashboard</h1>
+    <h1>Welcome to the Order App!</h1>
     <div v-if="userRole === 'User'">
       <!-- Content for regular users -->
+      <p>{{ `Welcome Back, ${userRole}!` }}</p>
     </div>
     <div v-else-if="userRole === 'Manager'">
       <!-- Content for managers -->
+      <p>{{ `Welcome Back, ${userRole}!` }}</p>
     </div>
     <div v-else-if="userRole === 'Admin'">
       <!-- Content for admins -->
+      <p>{{ `Welcome Back, ${userRole}!` }}</p>
     </div>
     <div v-else>
       <!-- Content for guests or undefined roles -->
+      <p>Undefined role</p>
     </div>
   </div>
 </template>
