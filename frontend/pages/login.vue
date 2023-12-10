@@ -52,6 +52,7 @@
 
                 // Redirect user based on role
                 this.$router.push(role === 'manager' ? '/manager-dashboard' : '/');
+                
 
             } catch (error) {
                 // Handle errors here
