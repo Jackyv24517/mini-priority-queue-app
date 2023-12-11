@@ -20,7 +20,16 @@
           </v-form>
         </v-card-text>
       </v-card>
-    </v-container>        
+    </v-container>       
+    
+      <v-snackbar
+        v-model="showSnackbar"
+        :timeout="3000"  
+        color="error"
+      >
+        {{ snackbarMessage }}
+        <v-btn color="white" text @click="showSnackbar = false">Close</v-btn>
+      </v-snackbar>
     </v-app>
   </template>
   
@@ -33,7 +42,9 @@
           username: '',
           password: ''
         },
-        error: ''
+        error: '',
+        showSnackbar: false,
+        snackbarMessage: ''
       };
     },
     methods: {
@@ -51,13 +62,22 @@
 
                 // Redirect user based on role
                 //this.$router.push(role === 'manager' ? '/manager-dashboard' : '/');
+
+                //toast message on successful login
+                this.snackbarMessage = 'Login successful!';
+                this.showSnackbar = true;
+
+                //route to landing page
                 this.$router.push('/');
                 
 
             } catch (error) {
                 // Handle errors here
                 // You can customize this error message based on the error response from your backend
-                this.error = error.response && error.response.data ? error.response.data.message : 'Invalid username or password';
+                console.log("error: ", error);
+                //this.error = error.response && error.response.data ? error.response.data.message : 'Invalid username or password';
+                this.snackbarMessage = 'Login failed: ' + !error.response.data ? error.message : error.response.data ;
+                this.showSnackbar = true;
             }
         },
     }
