@@ -63,12 +63,12 @@
                 // Redirect user based on role
                 //this.$router.push(role === 'manager' ? '/manager-dashboard' : '/');
 
+                //route to landing page
+                this.$router.push('/');
+
                 //toast message on successful login
                 this.snackbarMessage = 'Login successful!';
                 this.showSnackbar = true;
-
-                //route to landing page
-                this.$router.push('/');
                 
 
             } catch (error) {
@@ -76,7 +76,7 @@
                 // You can customize this error message based on the error response from your backend
                 console.log("error: ", error);
                 //this.error = error.response && error.response.data ? error.response.data.message : 'Invalid username or password';
-                this.snackbarMessage = 'Login failed: ' + !error.response.data ? error.message : error.response.data ;
+                this.snackbarMessage = 'Login failed: ' + error.response.data ? error.response.data : error.message  ;
                 this.showSnackbar = true;
             }
         },
