@@ -1,5 +1,8 @@
 <template>
     <v-container>
+      <h5>Welcome Back!</h5>
+      <p>Kindly fill and create order below.</p>
+  
       <h3>Create New Order</h3>
       <v-form @submit.prevent="createOrder">
         <v-text-field
@@ -10,7 +13,7 @@
   
         <v-select
           label="Order Type"
-          :items="['Normal', 'VIP']"
+          :items="['User', 'VIP']"
           v-model="orderType"
           required
         ></v-select>

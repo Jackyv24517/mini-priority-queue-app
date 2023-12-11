@@ -8,7 +8,7 @@
         ></v-text-field>
   
         <v-select
-          :items="['Normal', 'VIP']"
+          :items="['User', 'VIP']"
           label="Order Type"
           v-model="orderType"
           required

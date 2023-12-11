@@ -13,7 +13,7 @@
     <AdminComponent v-if="userRoles.includes('Admin')" />
 
     <!-- Order Content specifically for VIP or Normal users -->
-    <NewOrderComponent v-else-if="userRoles.includes('VIP') || userRoles.includes('Normal')" />
+    <NewOrderComponent v-else-if="userRoles.includes('VIP') || userRoles.includes('User')" />
 
     <!-- Fallback content for other roles or unauthenticated users -->
     <DefaultUserComponent v-else />
@@ -62,6 +62,7 @@ export default {
       const token = localStorage.getItem('userToken');
       if (token) {
         const decoded = jwtDecode(token);
+        console.log("roles: ", decoded);
         this.userRoles = decoded.roles || []; // Adjust based on your token's payload structure
       }
     },
