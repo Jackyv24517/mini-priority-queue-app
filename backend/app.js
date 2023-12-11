@@ -4,6 +4,7 @@ const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
+const orderRoutes = require('./routes/order.routes'); 
 
 const app = express();
 app.use(express.json());
@@ -26,6 +27,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .catch(err => console.error('Could not connect to MongoDB Atlas', err));
 
   app.use('/api/auth', authRoutes);
+  app.use('/api', orderRoutes);
 
 const port = process.env.PORT || 3200;
 app.listen(port, () => {

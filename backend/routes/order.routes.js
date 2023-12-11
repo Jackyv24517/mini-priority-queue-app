@@ -1,6 +1,6 @@
 const express = require('express');
 const Order = require('../models/orderModel');
-const Counter = require('./models/counterModel');
+const Counter = require('../models/counterModel');
 const router = express.Router();
 
 // POST /api/orders - Create a new order
@@ -9,12 +9,14 @@ router.post('/orders', async (req, res) => {
     const { type, details } = req.body;
 
     // Generate the next order ID here (you'll need to implement this logic)
-    const nextOrderId = await getNextOrderId();
+    const orderId = await getNextOrderId();
 
+    // Create a new order
     const newOrder = new Order({
-      orderId: nextOrderId,
-      type,
-      details
+        orderId,
+        type,
+        details,
+        status: 'PENDING' // Default status
     });
 
     await newOrder.save();
@@ -37,7 +39,10 @@ async function getNextOrderId(orderType) {
 
   // Format the order ID based on the order type
   const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
-  return prefix + counter.seq;
+  
+  // Format the order ID with zero-padding
+  const paddedSeq = String(counter.seq).padStart(4, '0');
+  return `${prefix}${paddedSeq}`;
 }
 
 
