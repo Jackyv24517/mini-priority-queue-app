@@ -25,7 +25,6 @@
   </template>
   
   <script>
-  import axios from 'axios';
   
   export default {
     data() {
@@ -51,7 +50,8 @@
                 localStorage.setItem('userToken', token);
 
                 // Redirect user based on role
-                this.$router.push(role === 'manager' ? '/manager-dashboard' : '/');
+                //this.$router.push(role === 'manager' ? '/manager-dashboard' : '/');
+                this.$router.push('/');
                 
 
             } catch (error) {
