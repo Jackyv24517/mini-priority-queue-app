@@ -1,6 +1,6 @@
 <template>
     <v-container>
-      <h5>Welcome Back!</h5>
+      <h5>{{ `Welcome Back, ${userRole}!` }}</h5>
       <p>Kindly fill and create order below.</p>
   
       <h3 class="mt-5 mb-2 pt-5">Create New Order</h3>
@@ -13,8 +13,9 @@
   
         <v-select
           label="Order Type"
-          :items="['User', 'VIP']"
+          :items="['Normal', 'VIP']"
           v-model="orderType"
+          :readonly="true"
           required
         ></v-select>
   
@@ -28,14 +29,33 @@
     data() {
       return {
         orderDetails: '',
-        orderType: null
+        orderType: null,
+        userRole: '',
       };
     },
+    mounted() {
+      this.userRole = this.$getUserRoleFromToken();
+      console.log('User role:', this.userRole);
+    },
+    created() {
+      this.setOrderTypeBasedOnUserRole();
+    },
     methods: {
+      setOrderTypeBasedOnUserRole() {
+        const userRoles = this.$getUserRoleFromToken();
+        
+        // Set order type based on user role
+        if (userRoles.includes('VIP')) {
+          this.orderType = 'VIP';
+        } else if (userRoles.includes('User')) {
+          this.orderType = 'Normal';
+        }
+       
+      },
       async createOrder() {
         try {
           // Assuming your API endpoint for creating an order is something like /api/orders
-          const response = await this.$axios.post('/api/orders', {
+          const response = await this.$axios.post('/orders', {
             details: this.orderDetails,
             type: this.orderType
           });
