@@ -13,7 +13,7 @@
       <!-- Bot Management Table -->
       <v-data-table :headers="botHeaders" :items="bots" class="elevation-1 mt-5">
         <template v-slot:item.status="{ item }">
-            <v-chip :color="getStatusColor(item.status)">
+            <v-chip :color="getBotStatusColor(item.status)">
             {{ item.status }}
             </v-chip>
         </template>
@@ -29,7 +29,7 @@
     <h6>Order Processing Status</h6>
     <v-data-table :headers="botOrderHeaders" :items="orders" class="elevation-1">
         <template v-slot:item.bot="{ item }">
-        {{ item.botId ? `Bot ${item.botId}` : 'Unassigned' }}
+        {{ item.botId ? `Bot ${item.botId.botId}` : 'Unassigned' }}
         </template>
     </v-data-table>
     </div>
@@ -76,6 +76,7 @@
             try {
                 const response = await this.$axios.get('/orders');
                 this.orders = response.data;
+                console.log("Orders Data: ", this.orders);
             } catch (error) {
                 console.error('Error fetching orders:', error);
             }
@@ -115,6 +116,9 @@
         },
         getStatusColor(status) {
             return status === 'PROCESSING' ? 'red' : 'green';
+        },
+        getBotStatusColor(status) {
+            return status === 'BUSY' ? 'red' : 'green';
         },
         refreshBotTable() {
             this.fetchBots(); // Assuming fetchBots is your method to fetch bot data
