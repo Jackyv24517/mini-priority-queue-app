@@ -41,14 +41,32 @@
         this.fetchBots();
     },
     methods: {
-        fetchBots() {
-      // API call to get bots
+        async fetchBots() {
+            // API call to get bots
+            try {
+                const response = await this.$axios.get('/api/bots');
+                this.bots = response.data;
+            } catch (error) {
+                console.error('Error fetching bots:', error);
+            }
         },
-        addBot() {
-        // API call to add a bot
+        async addBot() {
+            // API call to add a bot
+            try {
+                const response = await this.$axios.post('/api/bots', { /* bot details */ });
+                this.bots.push(response.data);
+            } catch (error) {
+                console.error('Error adding bot:', error);
+            }
         },
-        removeBot(botId) {
-        // API call to remove a bot
+        async removeBot(botId) {
+            // API call to remove a bot
+            try {
+                await this.$axios.delete(`/api/bots/${botId}`);
+                this.bots = this.bots.filter(bot => bot._id !== botId);
+            } catch (error) {
+                console.error('Error removing bot:', error);
+            }
         },
         getStatusColor(status) {
             return status === 'PROCESSING' ? 'red' : 'green';
