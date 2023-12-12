@@ -46,8 +46,10 @@ export default {
     async fetchOrders() {
     try {
       // Fetch initial order data from the REST API
-      const response = await this.$axios.get('/api/orders');
+      const response = await this.$axios.get('/orders');
       const orders = response.data;
+      
+      console.log("All orders: " , orders);
 
       this.pendingOrders = orders.filter(order => order.status === 'PENDING');
       this.completedOrders = orders.filter(order => order.status === 'COMPLETE');
