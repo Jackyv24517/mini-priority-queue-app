@@ -32,11 +32,35 @@ async function assignOrdersToBots() {
     await bot.save();
   }
 
+  //add new bot
   router.post('/bots', async (req, res) => {
     try {
       const newBot = new Bot({ /* bot details */ });
       await newBot.save();
       res.status(201).json(newBot);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  //get all bots
+  router.get('/bots', async (req, res) => {
+    try {
+      const bots = await Bot.find({});
+      res.json(bots);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  //remove a bot
+  router.delete('/bots/:id', async (req, res) => {
+    try {
+      const bot = await Bot.findByIdAndDelete(req.params.id);
+      if (!bot) {
+        return res.status(404).json({ message: 'Bot not found' });
+      }
+      res.json({ message: 'Bot removed' });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
