@@ -1,20 +1,58 @@
 <template>
     <v-container>
-      <h3>Admin Dashboard</h3>
-      <p>Manage and assign bots to process orders.</p>
+        <div class="mb-5 pb-3">
+            <h3>Admin Dashboard</h3>
+            <p>Manage and assign bots to process orders.</p>
+        </div>
       <!-- Additional controls for managing bots -->
+      <!--
       <v-btn @click="assignBot">Assign Bot</v-btn>
+      -->
+      <v-btn @click="addBot">Add Bot</v-btn>
+      <v-data-table :headers="headers" :items="bots" class="elevation-1 mt-5">
+        <template v-slot:item.status="{ item }">
+            <v-chip :color="getStatusColor(item.status)">
+            {{ item.status }}
+            </v-chip>
+        </template>
+        <template v-slot:item.actions="{ item }">
+            <v-btn icon @click="removeBot(item.botId)">
+            <v-icon>mdi-delete</v-icon>
+            </v-btn>
+        </template>
+    </v-data-table>
     </v-container>
+
   </template>
   
   <script>
   export default {
+    data() {
+        return {
+            bots: [], // store bot data
+            headers: [
+                { text: 'Bot ID', value: 'botId' },
+                { text: 'Status', value: 'status' },
+                { text: 'Actions', value: 'actions', sortable: false }
+            ]
+        };
+    },
+    mounted() {
+        this.fetchBots();
+    },
     methods: {
-      assignBot() {
-        // Logic to assign a bot to handle orders
-        console.log('Bot assigned to handle orders');
-        // Add logic to make an API call to assign the bot
-      }
+        fetchBots() {
+      // API call to get bots
+        },
+        addBot() {
+        // API call to add a bot
+        },
+        removeBot(botId) {
+        // API call to remove a bot
+        },
+        getStatusColor(status) {
+            return status === 'PROCESSING' ? 'red' : 'green';
+        }
     }
   };
   </script>
