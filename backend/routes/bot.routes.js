@@ -21,16 +21,41 @@ async function assignOrdersToBots() {
       }
     });
   }
-  
-  async function completeOrder(orderId, bot) {
-    const order = await Order.findById(orderId);
+  //Completing the Order
+  async function completeOrder(order, bot) {
     order.status = 'COMPLETED';
     await order.save();
   
     bot.status = 'IDLE';
     bot.currentOrderId = null;
     await bot.save();
+  
+    // Optionally, check for new orders to process
+    assignOrdersToBots();
   }
+
+  //Assigning Orders to Bots
+  async function assignOrdersToBots() {
+    const idleBots = await Bot.find({ status: 'IDLE' });
+    const pendingOrders = await Order.find({ status: 'PENDING' }).sort({ createdAt: 1 });
+  
+    for (let i = 0; i < idleBots.length; i++) {
+      if (pendingOrders[i]) {
+        idleBots[i].status = 'PROCESSING';
+        idleBots[i].currentOrderId = pendingOrders[i]._id;
+        //update bot status
+        await idleBots[i].save();
+  
+        pendingOrders[i].status = 'PROCESSING';
+        //update order status
+        await pendingOrders[i].save();
+        
+        //Simulate the order processing time
+        setTimeout(() => completeOrder(pendingOrders[i], idleBots[i]), 10000);
+      }
+    }
+  }
+  
 
   //add new bot
   router.post('/bots', async (req, res) => {
