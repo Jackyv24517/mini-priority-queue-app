@@ -9,7 +9,7 @@
       <v-btn @click="assignBot">Assign Bot</v-btn>
       -->
       <v-btn @click="addBot">Add Bot</v-btn>
-      <v-btn @click="removeLatestBot" color="error">Delete Bot</v-btn>
+      <v-btn @click="removeBot" color="error">Delete Bot</v-btn>
 
       <!-- Bot Management Table -->
       <v-data-table :headers="botHeaders" :items="bots" class="elevation-1 mt-5">
@@ -104,6 +104,25 @@
                 console.error('Error adding bot:', error);
             }
         },
+        async removeBot(){
+            // API call to remove latest bot
+            try {
+                const response = await this.$axios.delete('/bots/newest');
+                console.log(response.data.message);
+
+                this.snackbarMessage = 'Bot successfully removed';
+                this.showSnackbar = true;
+
+                // Fetch updated bots & orders list to handle UI update
+                this.refreshBotTable();
+                this.refreshOrderTable();
+            } catch (error) {
+                console.error('Error deleting newest bot:', error);
+            }
+        },
+
+        /*
+        //old remove latest Bot logic handled by frontend
         async removeBot(botId) {
             // API call to remove a bot
             try {
@@ -124,7 +143,8 @@
                 const latestBotId = this.bots[this.bots.length - 1].botId;
                 this.removeBot(latestBotId);
             }
-        },
+        
+        },*/
         getStatusColor(status) {
             return status === 'PROCESSING' ? 'red' : 'green';
         },
@@ -132,7 +152,10 @@
             return status === 'BUSY' ? 'red' : 'green';
         },
         refreshBotTable() {
-            this.fetchBots(); // Assuming fetchBots is your method to fetch bot data
+            this.fetchBots(); // re-fetch bot data
+        },
+        refreshOrderTable() {
+            this.fetchOrders(); // re-fetch order data
         },
     }
   };

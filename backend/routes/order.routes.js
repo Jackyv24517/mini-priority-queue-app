@@ -63,6 +63,7 @@ router.get('/orders', async (req, res) => {
 
 //delete newest bot only
 router.delete('/bots/newest', (req, res) => {
+    console.log("Delete newest bot function is called");
     try {
       const removedBot = botStore.removeNewestBot(orderHeap, updateOrderStatus);
       if (removedBot) {
