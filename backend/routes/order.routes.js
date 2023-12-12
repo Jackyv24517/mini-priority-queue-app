@@ -3,12 +3,13 @@ const express = require('express');
 // const Counter = require('../models/counterModel');
 //const Bot = require('../models/botModel');
 const router = express.Router();
+const botStore = require('../store/botStore');
 
 const MaxHeap = require('../utils/MaxHeap');
 
 // In-memory data storage
 let orders = [];
-let bots = [];
+let bots = botStore.getBots;
 let nextOrderId = 1;
 let orderHeap = new MaxHeap();
 
@@ -71,18 +72,18 @@ const getNextAvailableBot = () => {
 
 //Assigning Orders to Bots
 async function assignOrdersToBots() {
-    let bot = getNextAvailableBot();
+    let availableBot = getNextAvailableBot();
   
-    while (bot && !orderHeap.isEmpty()) {
+    while (availableBot && !orderHeap.isEmpty()) {
         const order = orderHeap.extractMax(); // Get the highest priority order
     
         // Assign the order to the bot
-        bot.status = 'BUSY';
-        bot.currentOrder = order.orderId;
+        availableBot.status = 'BUSY';
+        availableBot.currentOrder = order.orderId;
     
         // Update the order status
         order.status = 'PROCESSING';
-        order.botId = bot.botId;
+        order.botId = availableBot.botId;
 
         // Emit an update via WebSocket
         updateOrderStatus(order.orderId, 'PROCESSING');
@@ -91,7 +92,7 @@ async function assignOrdersToBots() {
         setTimeout(() => completeOrder(order), 10000);
     
         // Try to get the next available bot for further processing
-        bot = getNextAvailableBot();
+        availableBot = getNextAvailableBot();
     }
 }
 
