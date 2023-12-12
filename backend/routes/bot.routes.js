@@ -61,17 +61,20 @@ async function assignOrdersToBots() {
   });
 
   //remove a bot
-  router.delete('/bots/:id', async (req, res) => {
+  router.delete('/bots/:botId', async (req, res) => {
     try {
-      const bot = await Bot.findByIdAndDelete(req.params.id);
+    const botId = parseInt(req.params.botId);  
+    const bot = await Bot.findOneAndDelete({ botId: botId });
       if (!bot) {
         return res.status(404).json({ message: 'Bot not found' });
       }
       res.json({ message: 'Bot removed' });
     } catch (error) {
+      console.error(error); // Additional logging on  error
       res.status(500).json({ message: error.message });
     }
   });
+  
 
   module.exports = router;
   
