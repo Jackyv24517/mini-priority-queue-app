@@ -14,15 +14,11 @@ const app = express();
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socketIo(server);
-io.on('connection', (socket) => {
-  console.log('A user connected via WebSocket');
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
-
-  // WebSocket event listeners and emitters
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000', // allowed frontend URL
+    methods: ['GET', 'POST']
+  }
 });
 
 // CORS configuration
@@ -46,9 +42,29 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   app.use('/api', orderRoutes);
   app.use('/api', botRoutes);
 
+
+ /* 
 const port = process.env.PORT || 3200;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+}); */
+
+const port = process.env.PORT || 3200;
+
+// Update: Use server.listen instead of app.listen
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+// Setup WebSocket connections using Socket.IO
+io.on('connection', (socket) => {
+  console.log('A user connected via WebSocket');
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+
+  // WebSocket event listeners and emitters
 });
 
 module.exports = { app, server, io };

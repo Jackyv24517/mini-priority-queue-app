@@ -52,7 +52,7 @@ export default {
       console.log("All orders: " , orders);
 
       this.pendingOrders = orders.filter(order => order.status === 'PENDING');
-      this.completedOrders = orders.filter(order => order.status === 'COMPLETE');
+      this.completedOrders = orders.filter(order => order.status === 'COMPLETED');
     } catch (error) {
       console.error('Error fetching orders:', error);
       // Handle error appropriately
@@ -62,14 +62,14 @@ export default {
     // Remove the order from its current list
     if (updatedOrder.oldStatus === 'PENDING') {
       this.pendingOrders = this.pendingOrders.filter(order => order.orderId !== updatedOrder.orderId);
-    } else if (updatedOrder.oldStatus === 'COMPLETE') {
+    } else if (updatedOrder.oldStatus === 'COMPLETED') {
       this.completedOrders = this.completedOrders.filter(order => order.orderId !== updatedOrder.orderId);
     }
 
     // Add the order to the appropriate list based on its new status
     if (updatedOrder.status === 'PENDING') {
       this.pendingOrders.push(updatedOrder);
-    } else if (updatedOrder.status === 'COMPLETE') {
+    } else if (updatedOrder.status === 'COMPLETED') {
       this.completedOrders.push(updatedOrder);
     }
   },
@@ -90,7 +90,7 @@ export default {
     this.fetchOrders();
 
     // Initialize WebSocket connection
-    this.socket = io('http://localhost:4200'); // Replace with your server URL
+    this.socket = io('http://localhost:4200');
     this.socket.on('orderUpdate', (updatedOrder) => {
       this.updateOrderList(updatedOrder);
     });
