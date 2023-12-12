@@ -7,6 +7,8 @@ const router = express.Router();
 const MaxHeap = require('../utils/MaxHeap');
 const orderHeap = new MaxHeap();
 
+const io = require('./app');
+
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {
   try {
@@ -23,6 +25,9 @@ router.post('/orders', async (req, res) => {
         status: 'PENDING' // Default status
     });
     await newOrder.save();
+
+    // Emit the new order status
+    updateOrderStatus(newOrder._id, newOrder.status);
 
     // Insert the new order into the heap
     orderHeap.insert(newOrder);
@@ -87,6 +92,7 @@ async function assignOrdersToBots() {
   
         // Simulate the processing time (10 seconds)
         setTimeout(() => completeOrder(order, bot), 10000);
+        
       }
     }
 }
@@ -99,10 +105,30 @@ async function completeOrder(order, bot) {
     bot.status = 'IDLE';
     bot.currentOrderId = null;
     await bot.save();
+
+     // After processing is complete
+    await updateOrderStatus(order._id, 'COMPLETE');
   
     // Check for more orders to process
     assignOrdersToBots();
 }
+
+// update order status via websocket
+async function updateOrderStatus(orderId, newStatus) {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+  
+    const oldStatus = order.status;
+    order.status = newStatus;
+    await order.save();
+  
+    // Emit an event to all connected clients
+    io.emit('orderUpdate', { ...order.toObject(), oldStatus });
+  
+    return order;
+  }
 
 
 /*
