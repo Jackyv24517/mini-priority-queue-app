@@ -3,7 +3,7 @@ const router = express.Router();
 const botStore = require('../store/botStore');
 
 // In-memory storage for bots
-let bots = botStore.getBots;
+let bots = botStore.getBots();
 //let nextBotId = 1;
 
 // Add new bot
