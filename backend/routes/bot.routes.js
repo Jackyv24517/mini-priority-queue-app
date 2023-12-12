@@ -3,6 +3,7 @@ const Order = require('../models/orderModel');
 const Bot = require('../models/botModel');
 const router = express.Router();
 
+/* 
 async function assignOrdersToBots() {
     const idleBots = await Bot.find({ status: 'IDLE' });
     const pendingOrders = await Order.find({ status: 'PENDING' }).sort({ createdAt: 1 });
@@ -34,6 +35,9 @@ async function assignOrdersToBots() {
     assignOrdersToBots();
   }
 
+*/
+
+/*
   //Assigning Orders to Bots
   async function assignOrdersToBots() {
     const idleBots = await Bot.find({ status: 'IDLE' });
@@ -55,6 +59,7 @@ async function assignOrdersToBots() {
       }
     }
   }
+  */
   
 
   //add new bot
