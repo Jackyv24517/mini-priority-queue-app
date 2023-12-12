@@ -66,7 +66,7 @@
           // Handle the response - perhaps clear the form or show a success message
           console.log('Order created:', response.data);
           this.orderDetails = '';
-          this.orderType = null;
+          //this.orderType = null;
   
           // Emit an event if you need to update the parent component
           this.$emit('orderCreated');
