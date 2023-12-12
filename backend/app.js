@@ -5,6 +5,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
 const orderRoutes = require('./routes/order.routes'); 
+const botRoutes = require('./routes/bot.routes'); 
 
 const app = express();
 app.use(express.json());
@@ -28,6 +29,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
   app.use('/api/auth', authRoutes);
   app.use('/api', orderRoutes);
+  app.use('/api', botRoutes);
 
 const port = process.env.PORT || 3200;
 app.listen(port, () => {
