@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const cors = require('cors');
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
 const orderRoutes = require('./routes/order.routes'); 
@@ -9,6 +11,18 @@ const botRoutes = require('./routes/bot.routes');
 
 const app = express();
 app.use(express.json());
+
+const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connection', (socket) => {
+  console.log('A user connected via WebSocket');
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+
+  // WebSocket event listeners and emitters
+});
 
 // CORS configuration
 app.use(cors({
