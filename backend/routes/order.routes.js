@@ -7,7 +7,7 @@ const router = express.Router();
 const MaxHeap = require('../utils/MaxHeap');
 const orderHeap = new MaxHeap();
 
-const io = require('../app');
+const { getIO } = require('../socket');
 
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {
@@ -124,6 +124,7 @@ async function updateOrderStatus(orderId, newStatus) {
     order.status = newStatus;
     await order.save();
   
+    const io = getIO();
     // Emit an event to all connected clients
     io.emit('orderUpdate', { ...order.toObject(), oldStatus });
   

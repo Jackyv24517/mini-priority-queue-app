@@ -3,7 +3,7 @@ require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
+const socketIo = require('./socket');
 const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth.routes');
 const orderRoutes = require('./routes/order.routes'); 
@@ -14,12 +14,7 @@ const app = express();
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: 'http://localhost:3000', // allowed frontend URL
-    methods: ['GET', 'POST']
-  }
-});
+const io = socketIo.init(server);
 
 // CORS configuration
 app.use(cors({
@@ -66,5 +61,3 @@ io.on('connection', (socket) => {
 
   // WebSocket event listeners and emitters
 });
-
-module.exports = { app, server, io };
