@@ -30,6 +30,7 @@ router.post('/orders', async (req, res) => {
         orderId,
         type,
         details,
+        createdAt: Date.now, // Default createdAt
         status: 'PENDING' // Default status
     };
      // Add the new order to the orders array and order heap

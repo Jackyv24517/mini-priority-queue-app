@@ -17,5 +17,27 @@ module.exports = {
   removeBot: (botId) => {
     bots = bots.filter(bot => bot.botId !== botId);
   },
+  removeNewestBot: (orderHeap, updateOrderStatus) => {
+    if (bots.length === 0) {
+      return null;
+    }
+
+    // Assuming the newest bot has the highest botId
+    const newestBot = bots.reduce((max, bot) => (bot.botId > max.botId ? bot : max), bots[0]);
+
+    // Handle if the bot is processing an order
+    if (newestBot.status === 'BUSY' && newestBot.currentOrder) {
+      const orderIndex = orderHeap.findIndex(order => order.orderId === newestBot.currentOrder);
+      if (orderIndex !== -1) {
+        orderHeap[orderIndex].status = 'PENDING';
+        updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update order status
+      }
+    }
+
+    // Remove the bot
+    bots = bots.filter(bot => bot.botId !== newestBot.botId);
+
+    return newestBot;
+  },
   getNextBotId: () => nextBotId
 };
