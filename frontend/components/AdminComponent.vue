@@ -9,6 +9,7 @@
       <v-btn @click="assignBot">Assign Bot</v-btn>
       -->
       <v-btn @click="addBot">Add Bot</v-btn>
+      <v-btn @click="removeLatestBot" color="error">Delete Bot</v-btn>
 
       <!-- Bot Management Table -->
       <v-data-table :headers="botHeaders" :items="bots" class="elevation-1 mt-5">
@@ -17,11 +18,14 @@
             {{ item.status }}
             </v-chip>
         </template>
-        <template v-slot:item.actions="{ item }">
-            <v-btn icon @click="removeBot(item.botId)">
-            <v-icon>mdi-delete</v-icon>
-            </v-btn>
-        </template>
+        
+        <!--
+            <template v-slot:item.actions="{ item }">
+                <v-btn icon @click="removeBot(item.botId)">
+                <v-icon>mdi-delete</v-icon>
+                </v-btn>
+            </template>
+        -->
     </v-data-table>
 
     <!-- Bot Order Processing Table -->
@@ -56,7 +60,7 @@
             botHeaders: [
                 { text: 'Bot ID', value: 'botId' },
                 { text: 'Status', value: 'status' },
-                { text: 'Actions', value: 'actions', sortable: false }
+                //{ text: 'Actions', value: 'actions', sortable: false }
             ],
             botOrderHeaders: [
             { text: 'Order ID', value: 'orderId' },
@@ -112,6 +116,13 @@
                 this.refreshBotTable(); // Call method to refresh the bot table
             } catch (error) {
                 console.error('Error removing bot:', error);
+            }
+        },
+        removeLatestBot() {
+            // This assumes bots are sorted such that the latest is last in the array
+            if (this.bots.length > 0) {
+                const latestBotId = this.bots[this.bots.length - 1]._id;
+                this.removeBot(latestBotId);
             }
         },
         getStatusColor(status) {
