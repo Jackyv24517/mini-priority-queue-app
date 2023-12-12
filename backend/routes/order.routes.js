@@ -107,7 +107,7 @@ async function completeOrder(order, bot) {
     await bot.save();
 
      // After processing is complete
-    await updateOrderStatus(order._id, 'COMPLETE');
+    await updateOrderStatus(order._id, 'COMPLETED');
   
     // Check for more orders to process
     assignOrdersToBots();
