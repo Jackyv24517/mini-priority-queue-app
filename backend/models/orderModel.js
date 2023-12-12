@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-const Bot = mongoose.model('Bot', botSchema);
-
 const orderSchema = new mongoose.Schema({
   // Unique order identifier
   orderId: {
@@ -39,7 +37,7 @@ const orderSchema = new mongoose.Schema({
 
   botId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: `${Bot}`, // This should match the name of your Bot model
+    ref: 'Bot',
     default: null
   },
 
