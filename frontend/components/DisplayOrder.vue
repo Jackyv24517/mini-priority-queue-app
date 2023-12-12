@@ -62,7 +62,9 @@ export default {
     // Remove the order from its current list
     if (updatedOrder.oldStatus === 'PENDING') {
       this.pendingOrders = this.pendingOrders.filter(order => order.orderId !== updatedOrder.orderId);
+      this.completedOrders = this.completedOrders.filter(order => order.orderId !== updatedOrder.orderId);
     } else if (updatedOrder.oldStatus === 'COMPLETED') {
+      this.pendingOrders = this.pendingOrders.filter(order => order.orderId !== updatedOrder.orderId);
       this.completedOrders = this.completedOrders.filter(order => order.orderId !== updatedOrder.orderId);
     }
 
@@ -73,7 +75,6 @@ export default {
       this.completedOrders.push(updatedOrder);
     }
   },
-
   /*
     handleOrderUpdate(updatedOrder) {
       // Logic to handle an updated order
@@ -84,7 +85,7 @@ export default {
         this.pendingOrders.push(updatedOrder);
       }
     }
-    */
+  */
   },
   created() {
     this.fetchOrders();
@@ -93,6 +94,7 @@ export default {
     this.socket = io('http://localhost:4200');
     this.socket.on('orderUpdate', (updatedOrder) => {
       this.updateOrderList(updatedOrder);
+      //this.handleOrderUpdate(updatedOrder);
     });
   },
   beforeDestroy() {
