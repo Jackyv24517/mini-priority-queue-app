@@ -69,5 +69,10 @@ class MaxHeap {
     }
   }
 
+  /*
+    Description on logic handling:
+    For any given node I, the value of I is greater than or equal to the values of its children (in a max heap).
+   */
+
   module.exports = MaxHeap;
   
