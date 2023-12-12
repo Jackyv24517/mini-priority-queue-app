@@ -35,12 +35,19 @@ async function assignOrdersToBots() {
   //add new bot
   router.post('/bots', async (req, res) => {
     try {
-      const newBot = new Bot({ /* bot details */ });
-      await newBot.save();
-      res.status(201).json(newBot);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
+        const lastBot = await Bot.findOne().sort({ botId: -1 });
+        const botId = lastBot ? lastBot.botId + 1 : 1;
+    
+        const newBot = new Bot({
+          botId,
+          status: 'IDLE'  // Initial bots status as 'IDLE'
+        });
+    
+        await newBot.save();
+        res.status(201).json(newBot);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
   });
 
   //get all bots
