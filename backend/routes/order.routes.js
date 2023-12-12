@@ -9,7 +9,7 @@ const MaxHeap = require('../utils/MaxHeap');
 
 // In-memory data storage
 let orders = [];
-let bots = botStore.getBots;
+let bots = botStore.getBots();
 let nextOrderId = 1;
 let orderHeap = new MaxHeap();
 

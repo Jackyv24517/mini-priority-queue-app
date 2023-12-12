@@ -9,18 +9,17 @@ let bots = botStore.getBots();
 // Add new bot
 router.post('/bots', (req, res) => {
   try {
-    botStore.addBot({ status: 'IDLE' });
-    /*
+    
     const newBot = {
-      botId: nextBotId++,
       status: 'IDLE'  // Initial bots status as 'IDLE'
+    };
 
-      bots.push(newBot);
-    };*/
+    botStore.addBot(newBot);
 
     
     res.status(201).json(newBot);
   } catch (error) {
+    console.log("error: ", error);
     res.status(500).json({ message: error.toString() });
   }
 });
