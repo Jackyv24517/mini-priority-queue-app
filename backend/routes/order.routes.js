@@ -1,13 +1,18 @@
 const express = require('express');
 const Order = require('../models/orderModel');
-const Counter = require('../models/counterModel');
+// const Counter = require('../models/counterModel');
 const Bot = require('../models/botModel');
 const router = express.Router();
 
 const MaxHeap = require('../utils/MaxHeap');
-const orderHeap = new MaxHeap();
+
+// In-memory data storage
+let orders = [];
+let nextOrderId = 1;
+let orderHeap = new MaxHeap();
 
 const { getIO } = require('../socket');
+
 
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {
@@ -15,7 +20,7 @@ router.post('/orders', async (req, res) => {
     const { type, details } = req.body;
 
     // Generate the next order ID here (you'll need to implement this logic)
-    const orderId = await getNextOrderId(type);
+    const orderId = getNextOrderId(type);
 
     // Create a new order
     const newOrder = new Order({
@@ -24,13 +29,13 @@ router.post('/orders', async (req, res) => {
         details,
         status: 'PENDING' // Default status
     });
-    await newOrder.save();
+     // Add the new order to the orders array and order heap
+     orders.push(newOrder);
+     orderHeap.insert(newOrder);
 
     // Emit the new order status
-    updateOrderStatus(newOrder._id, newOrder.status);
+    getIO().emit('orderUpdate', newOrder);
 
-    // Insert the new order into the heap
-    orderHeap.insert(newOrder);
 
     // Assign orders immediately after adding
     assignOrdersToBots();
@@ -44,32 +49,16 @@ router.post('/orders', async (req, res) => {
 
 //Fetch all orders
 router.get('/orders', async (req, res) => {
-  try {
-    const orders = await Order.find({}).populate('botId');
-    res.json(orders);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
-  }
+    try {
+        res.json(orders);
+      } catch (error) {
+        res.status(500).json({ message: error.toString() });
+      }
 });
 
 async function getNextOrderId(orderType) {
-  // Check and initialize the counter if not present
-  let counter = await Counter.findById('order');
-  if (!counter) {
-    counter = new Counter({ _id: 'order', seq: 1 });
-    await counter.save();
-  }
-
-  // Increment the counter
-  counter = await Counter.findByIdAndUpdate('order', { $inc: { seq: 1 } }, { new: true });
-
-  // Format the order ID based on the order type
-  const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
-
-  // Format the order ID with zero-padding
-  const paddedSeq = String(counter.seq).padStart(4, '0');
-  return `${prefix}${paddedSeq}`;
+    const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
+    return `${prefix}${nextOrderId++}`;
 }
 
 //Assigning Orders to Bots
@@ -115,21 +104,17 @@ async function completeOrder(order, bot) {
 
 // update order status via websocket
 async function updateOrderStatus(orderId, newStatus) {
-    const order = await Order.findById(orderId);
+    const order = orders.find((o) => o.orderId === orderId);
     if (!order) {
-      throw new Error('Order not found');
+        throw new Error('Order not found');
     }
   
     const oldStatus = order.status;
     order.status = newStatus;
-    await order.save();
-  
-    const io = getIO();
+
     // Emit an event to all connected clients
-    io.emit('orderUpdate', { ...order.toObject(), oldStatus });
-  
-    return order;
-  }
+    getIO().emit('orderUpdate', { ...order, oldStatus });
+}
 
 
 /*
