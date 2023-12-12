@@ -7,7 +7,7 @@ const router = express.Router();
 const MaxHeap = require('../utils/MaxHeap');
 const orderHeap = new MaxHeap();
 
-const io = require('./app');
+const io = require('../app');
 
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {

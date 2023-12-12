@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth.routes');
 const orderRoutes = require('./routes/order.routes'); 
 const botRoutes = require('./routes/bot.routes'); 
 
+
 const app = express();
 app.use(express.json());
 
@@ -49,3 +50,5 @@ const port = process.env.PORT || 3200;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+module.exports = { app, server, io };
