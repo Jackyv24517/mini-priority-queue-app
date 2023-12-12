@@ -18,7 +18,7 @@
             {{ item.status }}
             </v-chip>
         </template>
-        
+
         <!--
             <template v-slot:item.actions="{ item }">
                 <v-btn icon @click="removeBot(item.botId)">
@@ -121,7 +121,7 @@
         removeLatestBot() {
             // This assumes bots are sorted such that the latest is last in the array
             if (this.bots.length > 0) {
-                const latestBotId = this.bots[this.bots.length - 1]._id;
+                const latestBotId = this.bots[this.bots.length - 1].botId;
                 this.removeBot(latestBotId);
             }
         },
