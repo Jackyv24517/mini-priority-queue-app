@@ -4,7 +4,7 @@ const Counter = require('../models/counterModel');
 const Bot = require('../models/botModel');
 const router = express.Router();
 
-const MaxHeap = require('./utils/MaxHeap');
+const MaxHeap = require('../utils/MaxHeap');
 const orderHeap = new MaxHeap();
 
 // POST /api/orders - Create a new order
@@ -117,7 +117,7 @@ async function completeOrder(order, bot) {
 
 /*
     Description on Assign Orders to Bots, processing & completing orders:
-    
+
     1. Looping Through Available Bots: loop through each available bot and check if there are orders in the heap.
     2. Extracting Orders from the Heap: use orderHeap.extractMax() to get the order with the highest priority.
     3. Updating Bot Status: The bot's status is set to 'BUSY', and currentOrderId is updated to the ID of the assigned order.

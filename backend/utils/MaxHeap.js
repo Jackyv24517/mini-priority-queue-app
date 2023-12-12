@@ -67,6 +67,10 @@ class MaxHeap {
         index = swap;
       }
     }
+
+    isEmpty() {
+        return this.heap.length === 0;
+    }
   }
 
   /*
