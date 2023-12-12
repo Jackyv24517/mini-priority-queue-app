@@ -44,8 +44,35 @@ export default {
   },
   methods: {
     async fetchOrders() {
-      // Existing fetch logic...
-    },
+    try {
+      // Fetch initial order data from the REST API
+      const response = await this.$axios.get('/api/orders');
+      const orders = response.data;
+
+      this.pendingOrders = orders.filter(order => order.status === 'PENDING');
+      this.completedOrders = orders.filter(order => order.status === 'COMPLETE');
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      // Handle error appropriately
+    }
+  },
+  updateOrderList(updatedOrder) {
+    // Remove the order from its current list
+    if (updatedOrder.oldStatus === 'PENDING') {
+      this.pendingOrders = this.pendingOrders.filter(order => order.orderId !== updatedOrder.orderId);
+    } else if (updatedOrder.oldStatus === 'COMPLETE') {
+      this.completedOrders = this.completedOrders.filter(order => order.orderId !== updatedOrder.orderId);
+    }
+
+    // Add the order to the appropriate list based on its new status
+    if (updatedOrder.status === 'PENDING') {
+      this.pendingOrders.push(updatedOrder);
+    } else if (updatedOrder.status === 'COMPLETE') {
+      this.completedOrders.push(updatedOrder);
+    }
+  },
+
+  /*
     handleOrderUpdate(updatedOrder) {
       // Logic to handle an updated order
       // Add to completedOrders if status is 'COMPLETE', else to pendingOrders
@@ -55,14 +82,15 @@ export default {
         this.pendingOrders.push(updatedOrder);
       }
     }
+    */
   },
   created() {
     this.fetchOrders();
 
     // Initialize WebSocket connection
-    this.socket = io('http://localhost:3000'); // Replace with your server URL
-    this.socket.on('orderUpdate', (order) => {
-      this.handleOrderUpdate(order);
+    this.socket = io('http://localhost:4200'); // Replace with your server URL
+    this.socket.on('orderUpdate', (updatedOrder) => {
+      this.updateOrderList(updatedOrder);
     });
   },
   beforeDestroy() {
