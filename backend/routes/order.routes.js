@@ -13,7 +13,7 @@ router.post('/orders', async (req, res) => {
     const { type, details } = req.body;
 
     // Generate the next order ID here (you'll need to implement this logic)
-    const orderId = await getNextOrderId();
+    const orderId = await getNextOrderId(type);
 
     // Create a new order
     const newOrder = new Order({
