@@ -32,5 +32,15 @@ async function assignOrdersToBots() {
     await bot.save();
   }
 
+  router.post('/bots', async (req, res) => {
+    try {
+      const newBot = new Bot({ /* bot details */ });
+      await newBot.save();
+      res.status(201).json(newBot);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   module.exports = router;
   
