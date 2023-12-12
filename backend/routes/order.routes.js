@@ -1,13 +1,14 @@
 const express = require('express');
-const Order = require('../models/orderModel');
+//const Order = require('../models/orderModel');
 // const Counter = require('../models/counterModel');
-const Bot = require('../models/botModel');
+//const Bot = require('../models/botModel');
 const router = express.Router();
 
 const MaxHeap = require('../utils/MaxHeap');
 
 // In-memory data storage
 let orders = [];
+let bots = [];
 let nextOrderId = 1;
 let orderHeap = new MaxHeap();
 
@@ -61,60 +62,75 @@ async function getNextOrderId(orderType) {
     return `${prefix}${nextOrderId++}`;
 }
 
+// Helper function to get the next available bot
+const getNextAvailableBot = () => {
+    return bots.find(bot => bot.status === 'IDLE');
+};
+
 //Assigning Orders to Bots
 async function assignOrdersToBots() {
-    const availableBots = await Bot.find({ status: 'IDLE' });
+    let bot = getNextAvailableBot();
   
-    for (const bot of availableBots) {
-      if (!orderHeap.isEmpty()) {
+    while (bot && !orderHeap.isEmpty()) {
         const order = orderHeap.extractMax(); // Get the highest priority order
-  
+    
         // Assign the order to the bot
         bot.status = 'BUSY';
-        bot.currentOrderId = order._id;
-        await bot.save();
-  
+        bot.currentOrder = order.orderId;
+    
         // Update the order status
         order.status = 'PROCESSING';
-        order.botId = bot._id;
-        await order.save();
-  
+        order.botId = bot.botId;
+
+        // Emit an update via WebSocket
+        updateOrderStatus(order.orderId, 'PROCESSING');
+    
         // Simulate the processing time (10 seconds)
-        setTimeout(() => completeOrder(order, bot), 10000);
-        
-      }
+        setTimeout(() => completeOrder(order), 10000);
+    
+        // Try to get the next available bot for further processing
+        bot = getNextAvailableBot();
     }
 }
 
-//Completing the Order
-async function completeOrder(order, bot) {
+//complete the processing of an order
+function completeOrder(order) {
     order.status = 'COMPLETED';
-    await order.save();
+    const bot = bots.find(b => b.botId === order.botId);
   
-    bot.status = 'IDLE';
-    bot.currentOrderId = null;
-    await bot.save();
-
-     // After processing is complete
-    await updateOrderStatus(order._id, 'COMPLETED');
+    // Ensure the bot is found and correctly assigned to the completed order
+    if (bot && bot.currentOrder === order.orderId) {
+      bot.status = 'IDLE';
+      bot.currentOrder = null;
+    }
+  
+    // Emit an update via WebSocket
+    updateOrderStatus(order.orderId, 'COMPLETED');
   
     // Check for more orders to process
     assignOrdersToBots();
-}
+  }
 
 // update order status via websocket
-async function updateOrderStatus(orderId, newStatus) {
-    const order = orders.find((o) => o.orderId === orderId);
+function updateOrderStatus(orderId, newStatus) {
+    const order = orders.find(o => o.orderId === orderId);
     if (!order) {
-        throw new Error('Order not found');
+      throw new Error('Order not found');
     }
   
     const oldStatus = order.status;
     order.status = newStatus;
-
+  
     // Emit an event to all connected clients
     getIO().emit('orderUpdate', { ...order, oldStatus });
-}
+  }
+
+
+// Initialize bots with some dummy data for testing
+bots = [
+    { botId: 1, status: 'IDLE', currentOrder: null },
+    // Add more bot objects as needed
+];
 
 
 /*
