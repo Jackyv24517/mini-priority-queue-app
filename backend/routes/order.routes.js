@@ -18,18 +18,19 @@ const { getIO } = require('../socket');
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {
   try {
+    console.log("req: ", req.body);
     const { type, details } = req.body;
 
     // Generate the next order ID here (you'll need to implement this logic)
     const orderId = getNextOrderId(type);
 
     // Create a new order
-    const newOrder = new Order({
+    const newOrder = {
         orderId,
         type,
         details,
         status: 'PENDING' // Default status
-    });
+    };
      // Add the new order to the orders array and order heap
      orders.push(newOrder);
      orderHeap.insert(newOrder);
@@ -44,6 +45,7 @@ router.post('/orders', async (req, res) => {
     
     res.status(201).json(newOrder);
   } catch (error) {
+    console.log("error: ", error);
     res.status(500).json({ message: error.message });
   }
 });
