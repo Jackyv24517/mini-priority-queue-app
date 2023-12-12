@@ -21,6 +21,17 @@
             </v-btn>
         </template>
     </v-data-table>
+
+    <!-- Snackbar prompt -->
+    <v-snackbar
+      v-model="showSnackbar"
+      :timeout="3000"
+      color="success"
+      top
+    >
+      {{ snackbarMessage }}
+      <v-btn color="white" text @click="showSnackbar = false">Close</v-btn>
+    </v-snackbar>
     </v-container>
 
   </template>
@@ -34,7 +45,9 @@
                 { text: 'Bot ID', value: 'botId' },
                 { text: 'Status', value: 'status' },
                 { text: 'Actions', value: 'actions', sortable: false }
-            ]
+            ],
+            showSnackbar: false,
+            snackbarMessage: '',
         };
     },
     mounted() {
@@ -65,13 +78,21 @@
             try {
                 await this.$axios.delete(`/bots/${botId}`);
                 this.bots = this.bots.filter(bot => bot._id !== botId);
+
+                this.snackbarMessage = 'Bot successfully removed';
+                this.showSnackbar = true;
+
+                this.refreshBotTable(); // Call method to refresh the bot table
             } catch (error) {
                 console.error('Error removing bot:', error);
             }
         },
         getStatusColor(status) {
             return status === 'PROCESSING' ? 'red' : 'green';
-        }
+        },
+        refreshBotTable() {
+            this.fetchBots(); // Assuming fetchBots is your method to fetch bot data
+        },
     }
   };
   </script>
