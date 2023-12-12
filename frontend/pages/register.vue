@@ -46,7 +46,7 @@
         username: '',
         password: '',
         role: '',
-        roles: ['User', 'Manager', 'Admin'], // Add or modify roles as necessary
+        roles: ['User', 'VIP', 'Admin',], // Add or modify roles as necessary
         rules: {
           required: value => !!value || 'Required.',
         },
@@ -55,11 +55,12 @@
     methods: {
       async registerUser() {
       try {
+        console.log("Selected role: ", this.role);
         // Make the API call to the backend registration endpoint
         const response = await this.$axios.post('/auth/register', {
           username: this.username,
           password: this.password,
-          role: this.role,
+          roles: [this.role],
         });
 
         // redirect to the login page upon successful registration
