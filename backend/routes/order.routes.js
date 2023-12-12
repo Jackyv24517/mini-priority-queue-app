@@ -61,6 +61,20 @@ router.get('/orders', async (req, res) => {
       }
 });
 
+//delete newest bot only
+router.delete('/bots/newest', (req, res) => {
+    try {
+      const removedBot = botStore.removeNewestBot(orderHeap, updateOrderStatus);
+      if (removedBot) {
+        res.json({ message: `Bot ${removedBot.botId} removed` });
+      } else {
+        res.status(404).json({ message: 'No bots available to remove' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.toString() });
+    }
+});
+
 function getNextOrderId(orderType) {
     const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
     return `${prefix}${nextOrderId++}`;
