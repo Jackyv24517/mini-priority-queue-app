@@ -2,9 +2,25 @@
  <v-app data-app>
   
   <v-container>
-    <v-app-bar>
-    <!-- Other navbar content -->
+    <v-app-bar class="mb-5">
+      <v-toolbar-title>{{ title }}</v-toolbar-title>
+
+      <!-- Display the user role as a chip/tag -->
+    <v-chip
+      v-if="isLoggedIn"
+      class="p-3 m-3"
+      color="primary"
+      text-color="white"
+    >
+      {{ userRoles[0] }}
+    </v-chip>
     <v-spacer></v-spacer>
+
+    <!-- Login and Register buttons -->
+    <template v-if="!isLoggedIn">
+      <v-btn text @click="goToLogin">Login</v-btn>
+      <v-btn text @click="goToRegister">Register</v-btn>
+    </template>
 
     <!-- Logout Button, shown only if the user is logged in -->
     <v-btn text v-if="isLoggedIn" @click="logout">Logout</v-btn>
@@ -38,7 +54,8 @@ export default {
   },
   data() {
     return {
-      userRoles: [] // This should be set based on the authenticated user's role
+      userRoles: [], // This should be set based on the authenticated user's role
+      title: "Order Apps"
     };
   },
   computed: {
@@ -76,6 +93,12 @@ export default {
       // Redirect to login or home page
       this.$router.push('/login');
     },
+    goToLogin() {
+      this.$router.push('/login');
+    },
+    goToRegister() {
+      this.$router.push('/register');
+    }
   },
   mounted() {
     // Logic to determine and set the user's role
