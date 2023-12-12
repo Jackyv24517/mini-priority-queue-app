@@ -3,7 +3,7 @@ const router = express.Router();
 const botStore = require('../store/botStore');
 
 // In-memory storage for bots
-let bots = botStore.getBots();
+//let bots = botStore.getBots();
 //let nextBotId = 1;
 
 // Add new bot
@@ -27,13 +27,16 @@ router.post('/bots', (req, res) => {
 // Get all bots
 router.get('/bots', (req, res) => {
   try {
+    let bots = botStore.getBots();
     res.json(bots);
+    console.log("All Bots: ",  bots);
   } catch (error) {
     res.status(500).json({ message: error.toString() });
   }
 });
 
 // Remove a bot
+/*
 router.delete('/bots/:botId', (req, res) => {
     try {
       const botId = parseInt(req.params.botId);
@@ -52,6 +55,6 @@ router.delete('/bots/:botId', (req, res) => {
     } catch (error) {
       res.status(500).json({ message: error.toString() });
     }
-});
+});*/
 
 module.exports = router;

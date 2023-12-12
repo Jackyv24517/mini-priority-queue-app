@@ -19,25 +19,27 @@ module.exports = {
   },
   removeNewestBot: (orderHeap, updateOrderStatus) => {
     if (bots.length === 0) {
-      return null;
-    }
-
-    // Assuming the newest bot has the highest botId
-    const newestBot = bots.reduce((max, bot) => (bot.botId > max.botId ? bot : max), bots[0]);
-
-    // Handle if the bot is processing an order
-    if (newestBot.status === 'BUSY' && newestBot.currentOrder) {
-      const orderIndex = orderHeap.findIndex(order => order.orderId === newestBot.currentOrder);
-      if (orderIndex !== -1) {
-        orderHeap[orderIndex].status = 'PENDING';
-        updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update order status
+        console.log("No bots available to remove.");
+        return null;
       }
-    }
-
-    // Remove the bot
-    bots = bots.filter(bot => bot.botId !== newestBot.botId);
-
-    return newestBot;
-  },
+  
+      // If there's only one bot, it's both the newest and the last
+      const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
+  
+      if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+        // Find and update the order in the heap
+        const orderIndex = orderHeap.findIndex(order => order.orderId === botToRemove.currentOrder);
+        if (orderIndex !== -1) {
+          orderHeap[orderIndex].status = 'PENDING';
+          updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update if necessary
+        }
+      }
+  
+      // Remove the bot
+      bots = bots.filter(bot => bot.botId !== botToRemove.botId);
+      console.log(`Bot ${botToRemove.botId} removed.`);
+      console.log("Bots list after deletion: ", bots);
+      return botToRemove;
+    },
   getNextBotId: () => nextBotId
 };
