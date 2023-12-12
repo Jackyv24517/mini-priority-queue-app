@@ -9,7 +9,7 @@
     <v-chip
       v-if="isLoggedIn"
       class="p-3 m-3"
-      color="primary"
+      :color="chipColor"
       text-color="white"
     >
       {{ userRoles[0] }}
@@ -62,6 +62,10 @@ export default {
     isLoggedIn() {
       // Check if the user is logged in (e.g., check if a token exists)
       return !!localStorage.getItem('userToken');
+    },
+    chipColor() {
+      // Return different colors based on the role
+      return this.userRoles.includes('Admin') ? 'brown' : this.userRoles.includes('VIP') ? 'purple' : 'blue';
     }
   },
   methods: {
