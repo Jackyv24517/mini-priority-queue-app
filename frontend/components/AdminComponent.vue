@@ -44,8 +44,9 @@
         async fetchBots() {
             // API call to get bots
             try {
-                const response = await this.$axios.get('/api/bots');
+                const response = await this.$axios.get('/bots');
                 this.bots = response.data;
+                console.log("Bots Data: ", this.bots);
             } catch (error) {
                 console.error('Error fetching bots:', error);
             }
@@ -53,7 +54,7 @@
         async addBot() {
             // API call to add a bot
             try {
-                const response = await this.$axios.post('/api/bots', { /* bot details */ });
+                const response = await this.$axios.post('/bots');
                 this.bots.push(response.data);
             } catch (error) {
                 console.error('Error adding bot:', error);
@@ -62,7 +63,7 @@
         async removeBot(botId) {
             // API call to remove a bot
             try {
-                await this.$axios.delete(`/api/bots/${botId}`);
+                await this.$axios.delete(`/bots/${botId}`);
                 this.bots = this.bots.filter(bot => bot._id !== botId);
             } catch (error) {
                 console.error('Error removing bot:', error);
