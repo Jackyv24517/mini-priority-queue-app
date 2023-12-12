@@ -41,6 +41,12 @@ const orderSchema = new mongoose.Schema({
     default: null
   },
 
+  priority: {
+    type: Number,
+    required: true,
+    default: 0 // Higher numbers represent higher priority
+  }
+
 });
 
 module.exports = mongoose.model('Order', orderSchema);
