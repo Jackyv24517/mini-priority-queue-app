@@ -1,6 +1,7 @@
 const express = require('express');
 const Order = require('../models/orderModel');
 const Counter = require('../models/counterModel');
+const Bot = require('../models/botModel');
 const router = express.Router();
 
 // POST /api/orders - Create a new order
@@ -26,6 +27,17 @@ router.post('/orders', async (req, res) => {
   }
 });
 
+//Fetch all orders
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await Order.find({}).populate('botId', 'botId');
+    res.json(orders);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 async function getNextOrderId(orderType) {
   // Check and initialize the counter if not present
   let counter = await Counter.findById('order');
@@ -39,7 +51,7 @@ async function getNextOrderId(orderType) {
 
   // Format the order ID based on the order type
   const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
-  
+
   // Format the order ID with zero-padding
   const paddedSeq = String(counter.seq).padStart(4, '0');
   return `${prefix}${paddedSeq}`;

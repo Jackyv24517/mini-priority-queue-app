@@ -9,7 +9,9 @@
       <v-btn @click="assignBot">Assign Bot</v-btn>
       -->
       <v-btn @click="addBot">Add Bot</v-btn>
-      <v-data-table :headers="headers" :items="bots" class="elevation-1 mt-5">
+
+      <!-- Bot Management Table -->
+      <v-data-table :headers="botHeaders" :items="bots" class="elevation-1 mt-5">
         <template v-slot:item.status="{ item }">
             <v-chip :color="getStatusColor(item.status)">
             {{ item.status }}
@@ -22,6 +24,15 @@
         </template>
     </v-data-table>
 
+    <!-- Bot Order Processing Table -->
+    <div class="pt-5 mt-5">
+    <h6>Order Processing Status</h6>
+    <v-data-table :headers="botOrderHeaders" :items="orders" class="elevation-1">
+        <template v-slot:item.bot="{ item }">
+        {{ item.botId ? `Bot ${item.botId}` : 'Unassigned' }}
+        </template>
+    </v-data-table>
+    </div>
     <!-- Snackbar prompt -->
     <v-snackbar
       v-model="showSnackbar"
@@ -41,10 +52,16 @@
     data() {
         return {
             bots: [], // store bot data
-            headers: [
+            orders: [], // Array of orders
+            botHeaders: [
                 { text: 'Bot ID', value: 'botId' },
                 { text: 'Status', value: 'status' },
                 { text: 'Actions', value: 'actions', sortable: false }
+            ],
+            botOrderHeaders: [
+            { text: 'Order ID', value: 'orderId' },
+            { text: 'Status', value: 'status' },
+            { text: 'Bot Handling', value: 'bot' }
             ],
             showSnackbar: false,
             snackbarMessage: '',
@@ -52,8 +69,17 @@
     },
     mounted() {
         this.fetchBots();
+        this.fetchOrders(); // Fetch orders
     },
     methods: {
+        async fetchOrders() {
+            try {
+                const response = await this.$axios.get('/orders');
+                this.orders = response.data;
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        },
         async fetchBots() {
             // API call to get bots
             try {
