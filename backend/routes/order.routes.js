@@ -59,7 +59,7 @@ router.get('/orders', async (req, res) => {
       }
 });
 
-async function getNextOrderId(orderType) {
+function getNextOrderId(orderType) {
     const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
     return `${prefix}${nextOrderId++}`;
 }
@@ -129,10 +129,12 @@ function updateOrderStatus(orderId, newStatus) {
 
 
 // Initialize bots with some dummy data for testing
+/*
 bots = [
     { botId: 1, status: 'IDLE', currentOrder: null },
     // Add more bot objects as needed
 ];
+*/
 
 
 /*

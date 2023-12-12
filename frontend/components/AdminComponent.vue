@@ -33,7 +33,7 @@
     <h6>Order Processing Status</h6>
     <v-data-table :headers="botOrderHeaders" :items="orders" class="elevation-1">
         <template v-slot:item.bot="{ item }">
-        {{ item.botId ? `Bot ${item.botId.botId}` : 'Unassigned' }}
+        {{ item.botId ? `Bot ${item.botId}` : 'Unassigned' }}
         </template>
     </v-data-table>
     </div>
@@ -65,7 +65,7 @@
             botOrderHeaders: [
             { text: 'Order ID', value: 'orderId' },
             { text: 'Status', value: 'status' },
-            { text: 'Bot Handling', value: 'bot' }
+            { text: 'Bot Handling', value: 'botId' }
             ],
             showSnackbar: false,
             snackbarMessage: '',
