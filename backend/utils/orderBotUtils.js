@@ -1,4 +1,18 @@
-const botStore = require('../store/botStore'); // Adjust the path as needed
+const botStore = require('../store/botStore');
+
+function completeOrder(order, bot, orderHeap) {
+  order.status = 'COMPLETED';
+  bot.status = 'IDLE';
+  bot.currentOrder = null;
+
+  console.log("all bots before update: ", botStore.getBots());
+  // Update the bot in botStore
+  botStore.updateBot(bot);
+
+  console.log("all bots: ", botStore.getBots());
+  // Emit a WebSocket update if necessary
+  assignOrdersToBots(orderHeap, botStore.getBots()); // Check for more orders to process
+}
 
 function assignOrdersToBots(orderHeap, bots) {
   // check if there is any idle bots to process order
@@ -10,8 +24,9 @@ function assignOrdersToBots(orderHeap, bots) {
 
   bots.filter(bot => bot.status === 'IDLE').forEach(bot => {
     if (!orderHeap.isEmpty()) {
-      console.log(`${bot.botId} is assigned to handle ${order.orderId}`);
       const order = orderHeap.extractMax();
+      console.log(`${bot.botId} is assigned to handle ${order.orderId}`);
+     
       bot.status = 'BUSY';
       bot.currentOrder = order.orderId;
       order.status = 'PROCESSING';
@@ -20,16 +35,6 @@ function assignOrdersToBots(orderHeap, bots) {
       setTimeout(() => completeOrder(order, bot, orderHeap), 10000);
     }
   });
-}
-
-function completeOrder(order, bot, orderHeap) {
-  order.status = 'COMPLETED';
-  bot.status = 'IDLE';
-  bot.currentOrder = null;
-  // Update the bot in botStore
-  botStore.updateBot(bot);
-  // Emit a WebSocket update if necessary
-  assignOrdersToBots(orderHeap); // Check for more orders to process
 }
 
 module.exports = {

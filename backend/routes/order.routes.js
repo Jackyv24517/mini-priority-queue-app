@@ -6,6 +6,7 @@ const router = express.Router();
 const botStore = require('../store/botStore');
 
 const MaxHeap = require('../utils/MaxHeap');
+const { assignOrdersToBots, completeOrder } = require('../utils/orderBotUtils');
 
 // In-memory data storage
 let orders = [];
@@ -42,7 +43,7 @@ router.post('/orders', async (req, res) => {
 
 
     // Assign orders immediately after adding
-    assignOrdersToBots();
+    assignOrdersToBots(orderHeap, bots);
 
     
     res.status(201).json(newOrder);
@@ -76,6 +77,31 @@ router.delete('/bots/newest', (req, res) => {
     }
 });
 
+// Add new bot
+router.post('/bots', (req, res) => {
+    try {
+      
+      const newBot = {};
+      botStore.addBot(newBot, orderHeap);
+  
+      res.status(201).json(newBot);
+    } catch (error) {
+      console.log("error: ", error);
+      res.status(500).json({ message: error.toString() });
+    }
+  });
+  
+  // Get all bots
+  router.get('/bots', (req, res) => {
+    try {
+      let bots = botStore.getBots();
+      res.json(bots);
+      console.log("All Bots: ",  bots);
+    } catch (error) {
+      res.status(500).json({ message: error.toString() });
+    }
+  });
+
 function getNextOrderId(orderType) {
     const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
     return `${prefix}${nextOrderId++}`;
@@ -86,6 +112,7 @@ const getNextAvailableBot = () => {
     return bots.find(bot => bot.status === 'IDLE');
 };
 
+/*
 //Assigning Orders to Bots
 async function assignOrdersToBots() {
     let availableBot = getNextAvailableBot();
@@ -129,6 +156,7 @@ function completeOrder(order) {
     // Check for more orders to process
     assignOrdersToBots();
   }
+*/
 
 // update order status via websocket
 function updateOrderStatus(orderId, newStatus) {
@@ -142,7 +170,7 @@ function updateOrderStatus(orderId, newStatus) {
   
     // Emit an event to all connected clients
     getIO().emit('orderUpdate', { ...order, oldStatus });
-  }
+}
 
 
 // Initialize bots with some dummy data for testing

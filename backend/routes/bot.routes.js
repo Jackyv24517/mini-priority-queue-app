@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const botStore = require('../store/botStore');
+const orderRoute = require('../routes/order.routes');
 
 // In-memory storage for bots
 //let bots = botStore.getBots();
 //let nextBotId = 1;
 
+/*
 // Add new bot
 router.post('/bots', (req, res) => {
   try {
     
-    const newBot = {
-      status: 'IDLE'  // Initial bots status as 'IDLE'
-    };
-
-    botStore.addBot(newBot);
+    const newBot = {};
+    let orderHeap = orderRoute.getOrderHeap();
+    botStore.addBot(newBot, orderHeap);
 
     
     res.status(201).json(newBot);
@@ -23,7 +23,9 @@ router.post('/bots', (req, res) => {
     res.status(500).json({ message: error.toString() });
   }
 });
+*/
 
+/*
 // Get all bots
 router.get('/bots', (req, res) => {
   try {
@@ -34,6 +36,7 @@ router.get('/bots', (req, res) => {
     res.status(500).json({ message: error.toString() });
   }
 });
+*/
 
 // Remove a bot
 /*

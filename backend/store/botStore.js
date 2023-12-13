@@ -11,16 +11,25 @@ bots = [
 ];*/
 
 module.exports = {
-  getBots: () => bots,
-  updateBot: (updatedBot) => {
+  getBots() { return bots},
+  updateBot(updatedBot) {
     const botIndex = bots.findIndex(bot => bot.botId === updatedBot.botId);
     if (botIndex !== -1) {
       bots[botIndex] = updatedBot;
+    } else {
+      console.log("Bot not found for updating:", updatedBot);
     }
   },
-  addBot: (bot) => {
+  addBot(bot, orderHeap) {
+
     bot.botId = nextBotId++;
+    
+    // Ensuring new bots are initialized as 'IDLE'
+    bot.status = 'IDLE'; 
     bots.push(bot);
+
+    // After adding a new bot, check for and assign any pending orders
+    assignOrdersToBots(orderHeap, bots);
   },
   removeBot: (botId) => {
     bots = bots.filter(bot => bot.botId !== botId);
