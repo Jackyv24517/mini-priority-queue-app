@@ -9,7 +9,7 @@
             v-for="order in pendingOrders" 
             :key="order.orderId"
           >
-            Order #{{ order.orderId }} - {{ order.type }}
+            Order #{{ order.orderId }} - {{ order.type }} - {{ humanReadableDateTime(order.createdAt) }}
           </v-list-item>
         </v-list>
       </v-col>
@@ -22,7 +22,7 @@
             v-for="order in completedOrders" 
             :key="order.orderId"
           >
-            Order #{{ order.orderId }} - {{ order.type }}
+            Order #{{ order.orderId }} - {{ order.type }} - {{ humanReadableDateTime(order.createdAt) }}
           </v-list-item>
         </v-list>
       </v-col>
@@ -75,6 +75,10 @@ export default {
       this.completedOrders.push(updatedOrder);
     }
   },
+  humanReadableDateTime(timestamp){
+    const date = new Date(timestamp);
+    return date.toLocaleDateString("en-MY") + ' ' + date.toLocaleTimeString("en-MY")
+  }
   /*
     handleOrderUpdate(updatedOrder) {
       // Logic to handle an updated order

@@ -34,7 +34,7 @@ router.post('/orders', async (req, res) => {
         orderId,
         type,
         details,
-        createdAt: Date.now, // Default createdAt
+        createdAt: Date.now(), // Default createdAt
         status: 'PENDING' // Default status
     };
      // Add the new order to the orders array and order heap
@@ -69,7 +69,7 @@ router.get('/orders', async (req, res) => {
 router.delete('/bots/newest', (req, res) => {
     console.log("Delete newest bot function is called");
     try {
-      const removedBot = removeNewestBot(orderHeap, updateOrderStatus);
+      const removedBot = removeNewestBot(orderHeap);
       if (removedBot) {
         res.json({ message: `Bot ${removedBot.botId} removed` });
       } else {
@@ -175,7 +175,7 @@ function addBot(bot, orderHeap) {
     assignOrdersToBots(orderHeap);
   }
   
-  function removeNewestBot(orderHeap, updateOrderStatus) {
+  function removeNewestBot(orderHeap) {
     if (bots.length === 0) {
         console.log("No bots available to remove.");
         return null;
