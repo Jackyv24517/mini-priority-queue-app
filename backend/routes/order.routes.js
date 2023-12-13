@@ -13,6 +13,7 @@ const MaxHeap = require('../utils/MaxHeap');
 // In-memory data storage init
 let orders = [];
 let bots = [];
+let nextBotId = 1;
 let nextOrderId = 1;
 let orderHeap = new MaxHeap();
 
@@ -123,6 +124,9 @@ function completeOrder(order, bot, orderHeap) {
     console.log("all bots: ", bots);
     // Emit a WebSocket update if necessary
     assignOrdersToBots(orderHeap); // Check for more orders to process
+
+    // Emit an update via WebSocket
+    updateOrderStatus(order.orderId, 'COMPLETED');
   }
   
   function assignOrdersToBots(orderHeap) {
@@ -173,15 +177,25 @@ function addBot(bot, orderHeap) {
   
   function removeNewestBot(orderHeap, updateOrderStatus) {
     if (bots.length === 0) {
-      console.log("No bots available to remove.");
-      return null;
-    }
+        console.log("No bots available to remove.");
+        return null;
+      }
   
-    const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
+      const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
   
-    // ... logic for removing the newest bot ...
+      if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+        const orderIndex = orderHeap.findIndex(order => order.orderId === botToRemove.currentOrder);
+        if (orderIndex !== -1) {
+          orderHeap[orderIndex].status = 'PENDING';
+          updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update if necessary
+          orderHeap.insert(orderHeap[orderIndex]); // Re-insert the order back into the heap
+        }
+      }
   
-    return botToRemove;
+      bots = bots.filter(bot => bot.botId !== botToRemove.botId);
+      assignOrdersToBots(orderHeap, bots); // Reassign orders to available bots
+  
+      return botToRemove;
   }
   
   function updateBot(updatedBot) {
