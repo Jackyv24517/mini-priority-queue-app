@@ -1,110 +1,63 @@
 const express = require('express');
-const Order = require('../models/orderModel');
-const Bot = require('../models/botModel');
 const router = express.Router();
+const botStore = require('../store/botStore');
+const orderRoute = require('../routes/order.routes');
 
-/* 
-async function assignOrdersToBots() {
-    const idleBots = await Bot.find({ status: 'IDLE' });
-    const pendingOrders = await Order.find({ status: 'PENDING' }).sort({ createdAt: 1 });
-  
-    pendingOrders.forEach(async (order, index) => {
-      if (idleBots[index]) {
-        idleBots[index].status = 'PROCESSING';
-        idleBots[index].currentOrderId = order._id;
-        await idleBots[index].save();
-  
-        order.status = 'PROCESSING';
-        await order.save();
-  
-        // Start a timer for order processing (10 seconds as per your requirement)
-        setTimeout(() => completeOrder(order._id, idleBots[index]), 10000);
-      }
-    });
-  }
-  //Completing the Order
-  async function completeOrder(order, bot) {
-    order.status = 'COMPLETED';
-    await order.save();
-  
-    bot.status = 'IDLE';
-    bot.currentOrderId = null;
-    await bot.save();
-  
-    // Optionally, check for new orders to process
-    assignOrdersToBots();
-  }
+// In-memory storage for bots
+//let bots = botStore.getBots();
+//let nextBotId = 1;
 
+/*
+// Add new bot
+router.post('/bots', (req, res) => {
+  try {
+    
+    const newBot = {};
+    let orderHeap = orderRoute.getOrderHeap();
+    botStore.addBot(newBot, orderHeap);
+
+    
+    res.status(201).json(newBot);
+  } catch (error) {
+    console.log("error: ", error);
+    res.status(500).json({ message: error.toString() });
+  }
+});
 */
 
 /*
-  //Assigning Orders to Bots
-  async function assignOrdersToBots() {
-    const idleBots = await Bot.find({ status: 'IDLE' });
-    const pendingOrders = await Order.find({ status: 'PENDING' }).sort({ createdAt: 1 });
-  
-    for (let i = 0; i < idleBots.length; i++) {
-      if (pendingOrders[i]) {
-        idleBots[i].status = 'PROCESSING';
-        idleBots[i].currentOrderId = pendingOrders[i]._id;
-        //update bot status
-        await idleBots[i].save();
-  
-        pendingOrders[i].status = 'PROCESSING';
-        //update order status
-        await pendingOrders[i].save();
-        
-        //Simulate the order processing time
-        setTimeout(() => completeOrder(pendingOrders[i], idleBots[i]), 10000);
-      }
-    }
+// Get all bots
+router.get('/bots', (req, res) => {
+  try {
+    let bots = botStore.getBots();
+    res.json(bots);
+    console.log("All Bots: ",  bots);
+  } catch (error) {
+    res.status(500).json({ message: error.toString() });
   }
-  */
+});
+*/
+
+// Remove a bot
+/*
+router.delete('/bots/:botId', (req, res) => {
+    try {
+      const botId = parseInt(req.params.botId);
   
-
-  //add new bot
-  router.post('/bots', async (req, res) => {
-    try {
-        const lastBot = await Bot.findOne().sort({ botId: -1 });
-        const botId = lastBot ? lastBot.botId + 1 : 1;
-    
-        const newBot = new Bot({
-          botId,
-          status: 'IDLE'  // Initial bots status as 'IDLE'
-        });
-    
-        await newBot.save();
-        res.status(201).json(newBot);
-      } catch (error) {
-        res.status(500).json({ message: error.message });
-      }
-  });
-
-  //get all bots
-  router.get('/bots', async (req, res) => {
-    try {
-      const bots = await Bot.find({});
-      res.json(bots);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  //remove a bot
-  router.delete('/bots/:botId', async (req, res) => {
-    try {
-    const botId = parseInt(req.params.botId);  
-    const bot = await Bot.findOneAndDelete({ botId: botId });
-      if (!bot) {
+      // Check if the bot exists
+      const bots = botStore.getBots();
+      const botExists = bots.some(bot => bot.botId === botId);
+      if (!botExists) {
         return res.status(404).json({ message: 'Bot not found' });
       }
+  
+      // Remove the bot using botStore
+      botStore.removeBot(botId);
+  
       res.json({ message: 'Bot removed' });
     } catch (error) {
-      console.error(error); // Additional logging on  error
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.toString() });
     }
-  });
-  
+});*/
 
-  module.exports = router;
-  
+module.exports = router;

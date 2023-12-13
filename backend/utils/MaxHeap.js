@@ -16,7 +16,7 @@ class MaxHeap {
         let parentIndex = Math.floor((index - 1) / 2);
         let parent = this.heap[parentIndex];
   
-        if (element.priority <= parent.priority) break;
+        if (this.compare(element, parent) <= 0) break;
   
         this.heap[parentIndex] = element;
         this.heap[index] = parent;
@@ -47,16 +47,14 @@ class MaxHeap {
   
         if (leftChildIndex < length) {
           leftChild = this.heap[leftChildIndex];
-          if (leftChild.priority > element.priority) {
+          if (this.compare(leftChild, element) > 0) {
             swap = leftChildIndex;
           }
         }
         if (rightChildIndex < length) {
           rightChild = this.heap[rightChildIndex];
-          if (
-            (swap === null && rightChild.priority > element.priority) ||
-            (swap !== null && rightChild.priority > leftChild.priority)
-          ) {
+          if (this.compare(rightChild, element) > 0 && 
+              (swap === null || this.compare(rightChild, leftChild) > 0)) {
             swap = rightChildIndex;
           }
         }
@@ -68,15 +66,18 @@ class MaxHeap {
       }
     }
 
+    compare(order1, order2) {
+        if (order1.type === order2.type) {
+            // If types are the same, compare based on timestamp
+            return order2.createdAt - order1.createdAt;
+        }
+        // Give priority to VIP orders
+        return order1.type === 'VIP' ? 1 : -1;
+    }
+
     isEmpty() {
         return this.heap.length === 0;
     }
-  }
+}
 
-  /*
-    Description on logic handling:
-    For any given node I, the value of I is greater than or equal to the values of its children (in a max heap).
-   */
-
-  module.exports = MaxHeap;
-  
+module.exports = MaxHeap;

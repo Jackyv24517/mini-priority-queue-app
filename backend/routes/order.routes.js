@@ -1,135 +1,299 @@
 const express = require('express');
-const Order = require('../models/orderModel');
-const Counter = require('../models/counterModel');
-const Bot = require('../models/botModel');
 const router = express.Router();
-
 const MaxHeap = require('../utils/MaxHeap');
-const orderHeap = new MaxHeap();
+
+/* Unuse imports */
+//const Order = require('../models/orderModel');
+// const Counter = require('../models/counterModel');
+//const Bot = require('../models/botModel');
+// const botStore = require('../store/botStore');
+// const { assignOrdersToBots, completeOrder } = require('../utils/orderBotUtils');
+
+
+// In-memory data storage init
+let orders = [];
+let bots = [];
+let nextBotId = 1;
+let nextOrderId = 1;
+let orderHeap = new MaxHeap();
+let orderMap = new Map();
 
 const { getIO } = require('../socket');
 
+/* -- REST API ROUTES -- */
 // POST /api/orders - Create a new order
 router.post('/orders', async (req, res) => {
   try {
+    console.log("req: ", req.body);
     const { type, details } = req.body;
 
     // Generate the next order ID here (you'll need to implement this logic)
-    const orderId = await getNextOrderId(type);
+    const orderId = getNextOrderId(type);
 
     // Create a new order
-    const newOrder = new Order({
+    const newOrder = {
         orderId,
         type,
         details,
+        createdAt: Date.now(), // Default createdAt
         status: 'PENDING' // Default status
-    });
-    await newOrder.save();
+    };
+     // Add the new order to the orders array and order heap
+     orders.push(newOrder);
+     orderHeap.insert(newOrder);
 
     // Emit the new order status
-    updateOrderStatus(newOrder._id, newOrder.status);
+    getIO().emit('orderUpdate', newOrder);
 
-    // Insert the new order into the heap
-    orderHeap.insert(newOrder);
 
     // Assign orders immediately after adding
-    assignOrdersToBots();
+    assignOrdersToBots(orderHeap, bots);
 
     
     res.status(201).json(newOrder);
   } catch (error) {
+    console.log("error: ", error);
     res.status(500).json({ message: error.message });
   }
 });
 
 //Fetch all orders
 router.get('/orders', async (req, res) => {
-  try {
-    const orders = await Order.find({}).populate('botId');
-    res.json(orders);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
-  }
+    try {
+        res.json(orders);
+      } catch (error) {
+        res.status(500).json({ message: error.toString() });
+      }
 });
 
-async function getNextOrderId(orderType) {
-  // Check and initialize the counter if not present
-  let counter = await Counter.findById('order');
-  if (!counter) {
-    counter = new Counter({ _id: 'order', seq: 1 });
-    await counter.save();
+//delete newest bot only
+router.delete('/bots/newest', (req, res) => {
+    console.log("Delete newest bot function is called");
+    try {
+      const removedBot = removeNewestBot(orderHeap);
+      if (removedBot) {
+        res.json({ message: `Bot ${removedBot.botId} removed` });
+      } else {
+        res.status(404).json({ message: 'No bots available to remove' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.toString() });
+    }
+});
+
+// Add new bot
+router.post('/bots', (req, res) => {
+    try {
+      
+      const newBot = {};
+      addBot(newBot, orderHeap);
+  
+      res.status(201).json(newBot);
+    } catch (error) {
+      console.log("error: ", error);
+      res.status(500).json({ message: error.toString() });
+    }
+  });
+  
+  // Get all bots
+  router.get('/bots', (req, res) => {
+    try {
+      res.json(bots);
+      console.log("All Bots: ",  bots);
+    } catch (error) {
+      res.status(500).json({ message: error.toString() });
+    }
+  });
+
+/* -- Order Methods -- */
+
+function getNextOrderId(orderType) {
+    const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
+    return `${prefix}${nextOrderId++}`;
+}
+
+
+function completeOrder(order, bot, orderHeap) {
+    order.status = 'COMPLETED';
+    bot.status = 'IDLE';
+    bot.currentOrder = null;
+  
+    console.log("all bots before update: ", bots);
+    // Update the bot
+    updateBot(bot);
+  
+    console.log("all bots: ", bots);
+    // Emit a WebSocket update if necessary
+    assignOrdersToBots(orderHeap); // Check for more orders to process
+
+    // Emit an update via WebSocket
+    updateOrderStatus(order.orderId, 'COMPLETED');
+  }
+  
+  function assignOrdersToBots(orderHeap) {
+    // check if there is any idle bots to process order
+    const idleBots = bots.filter(bot => bot.status === 'IDLE');
+    if (idleBots.length === 0) {
+      console.log("No idle bots available to process orders.");
+      return;
+    }
+  
+    bots.filter(bot => bot.status === 'IDLE').forEach(bot => {
+      if (!orderHeap.isEmpty()) {
+        const order = orderHeap.extractMax();
+        console.log(`${bot.botId} is assigned to handle ${order.orderId}`);
+       
+        bot.status = 'BUSY';
+        bot.currentOrder = order.orderId;
+        order.status = 'PROCESSING';
+        order.botId = bot.botId;
+
+        orderMap.set(order.orderId, bot.botId);
+        // Simulate the processing time (10 seconds)
+        setTimeout(() => completeOrder(order, bot, orderHeap), 10000);
+      }
+    });
   }
 
-  // Increment the counter
-  counter = await Counter.findByIdAndUpdate('order', { $inc: { seq: 1 } }, { new: true });
-
-  // Format the order ID based on the order type
-  const prefix = orderType === 'VIP' ? 'VIP-' : 'N-';
-
-  // Format the order ID with zero-padding
-  const paddedSeq = String(counter.seq).padStart(4, '0');
-  return `${prefix}${paddedSeq}`;
-}
-
-//Assigning Orders to Bots
-async function assignOrdersToBots() {
-    const availableBots = await Bot.find({ status: 'IDLE' });
-  
-    for (const bot of availableBots) {
-      if (!orderHeap.isEmpty()) {
-        const order = orderHeap.extractMax(); // Get the highest priority order
-  
-        // Assign the order to the bot
-        bot.status = 'BUSY';
-        bot.currentOrderId = order._id;
-        await bot.save();
-  
-        // Update the order status
-        order.status = 'PROCESSING';
-        order.botId = bot._id;
-        await order.save();
-  
-        // Simulate the processing time (10 seconds)
-        setTimeout(() => completeOrder(order, bot), 10000);
-        
-      }
-    }
-}
-
-//Completing the Order
-async function completeOrder(order, bot) {
-    order.status = 'COMPLETED';
-    await order.save();
-  
-    bot.status = 'IDLE';
-    bot.currentOrderId = null;
-    await bot.save();
-
-     // After processing is complete
-    await updateOrderStatus(order._id, 'COMPLETED');
-  
-    // Check for more orders to process
-    assignOrdersToBots();
-}
-
 // update order status via websocket
-async function updateOrderStatus(orderId, newStatus) {
-    const order = await Order.findById(orderId);
+function updateOrderStatus(orderId, newStatus) {
+    const order = orders.find(o => o.orderId === orderId);
     if (!order) {
       throw new Error('Order not found');
     }
   
     const oldStatus = order.status;
     order.status = newStatus;
-    await order.save();
   
-    const io = getIO();
     // Emit an event to all connected clients
-    io.emit('orderUpdate', { ...order.toObject(), oldStatus });
+    getIO().emit('orderUpdate', { ...order, oldStatus });
+}
+
+/* -- Bot Management methods -- */
+function addBot(bot, orderHeap) {
+    bot.botId = nextBotId++;
+    bot.status = 'IDLE';
+    bots.push(bot);
   
-    return order;
+    assignOrdersToBots(orderHeap);
   }
+  
+  function removeNewestBot(orderHeap) {
+        console.log("Remove newest bot action triggered!");
+        if (bots.length === 0) {
+            console.log("No bots available to remove.");
+            return null;
+        }
+  
+        const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
+        
+        if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+            console.log("processing to remove bot from handling current order.");
+            // order map for quick lookup
+            if (orderMap.has(botToRemove.currentOrder)) {
+                // Get the order details
+                let order = orders.find(o => o.orderId === botToRemove.currentOrder);
+
+                if (order) {
+                    order.status = 'PENDING';
+                    updateOrderStatus(order.orderId, 'PENDING');
+                    orderHeap.insert(order);
+                    // Remove the entry from the map
+                    orderMap.delete(botToRemove.currentOrder);
+                }
+            }
+        }
+
+        /*
+        if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+            console.log("processing to remove bot from handling current order.");
+            const orderIndex = orderHeap.findIndex(order => order.orderId === botToRemove.currentOrder);
+            console.log("order index: ", orderIndex);
+            if (orderIndex !== -1) {
+                console.log(`changing order ${orderIndex} status`);
+                orderHeap[orderIndex].status = 'PENDING';
+                updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update if necessary
+
+                orderHeap.insert(orderHeap[orderIndex]); // Re-insert the order back into the heap
+                console.log("order reenterred order queue.");
+            }
+        }
+        */
+    
+        bots = bots.filter(bot => bot.botId !== botToRemove.botId);
+        assignOrdersToBots(orderHeap, bots); // Reassign orders to available bots
+  
+        return botToRemove;
+  }
+  
+  function updateBot(updatedBot) {
+    const botIndex = bots.findIndex(bot => bot.botId === updatedBot.botId);
+    if (botIndex !== -1) {
+      bots[botIndex] = updatedBot;
+    } else {
+      console.log("Bot not found for updating:", updatedBot);
+    }
+  }
+
+/*
+// Helper function to get the next available bot
+const getNextAvailableBot = () => {
+    return bots.find(bot => bot.status === 'IDLE');
+};
+
+//Assigning Orders to Bots
+async function assignOrdersToBots() {
+    let availableBot = getNextAvailableBot();
+  
+    while (availableBot && !orderHeap.isEmpty()) {
+        const order = orderHeap.extractMax(); // Get the highest priority order
+    
+        // Assign the order to the bot
+        availableBot.status = 'BUSY';
+        availableBot.currentOrder = order.orderId;
+    
+        // Update the order status
+        order.status = 'PROCESSING';
+        order.botId = availableBot.botId;
+
+        // Emit an update via WebSocket
+        updateOrderStatus(order.orderId, 'PROCESSING');
+    
+        // Simulate the processing time (10 seconds)
+        setTimeout(() => completeOrder(order), 10000);
+    
+        // Try to get the next available bot for further processing
+        availableBot = getNextAvailableBot();
+    }
+}
+
+//complete the processing of an order
+function completeOrder(order) {
+    order.status = 'COMPLETED';
+    const bot = bots.find(b => b.botId === order.botId);
+  
+    // Ensure the bot is found and correctly assigned to the completed order
+    if (bot && bot.currentOrder === order.orderId) {
+      bot.status = 'IDLE';
+      bot.currentOrder = null;
+    }
+  
+    // Emit an update via WebSocket
+    updateOrderStatus(order.orderId, 'COMPLETED');
+  
+    // Check for more orders to process
+    assignOrdersToBots();
+  }
+*/
+
+
+// Initialize bots with some dummy data for testing
+/*
+bots = [
+    { botId: 1, status: 'IDLE', currentOrder: null },
+    // Add more bot objects as needed
+];
+*/
 
 
 /*
