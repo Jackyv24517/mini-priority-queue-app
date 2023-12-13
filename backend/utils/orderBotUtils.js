@@ -1,4 +1,4 @@
-const botStore = require('../store/botStore');
+// const botStore = require('../store/botStore');
 
 function completeOrder(order, bot, orderHeap) {
   order.status = 'COMPLETED';
