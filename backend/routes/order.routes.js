@@ -16,6 +16,7 @@ let bots = [];
 let nextBotId = 1;
 let nextOrderId = 1;
 let orderHeap = new MaxHeap();
+let orderMap = new Map();
 
 const { getIO } = require('../socket');
 
@@ -146,6 +147,8 @@ function completeOrder(order, bot, orderHeap) {
         bot.currentOrder = order.orderId;
         order.status = 'PROCESSING';
         order.botId = bot.botId;
+
+        orderMap.set(order.orderId, bot.botId);
         // Simulate the processing time (10 seconds)
         setTimeout(() => completeOrder(order, bot, orderHeap), 10000);
       }
@@ -176,26 +179,51 @@ function addBot(bot, orderHeap) {
   }
   
   function removeNewestBot(orderHeap) {
-    if (bots.length === 0) {
-        console.log("No bots available to remove.");
-        return null;
-      }
-  
-      const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
-  
-      if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
-        const orderIndex = orderHeap.findIndex(order => order.orderId === botToRemove.currentOrder);
-        if (orderIndex !== -1) {
-          orderHeap[orderIndex].status = 'PENDING';
-          updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update if necessary
-          orderHeap.insert(orderHeap[orderIndex]); // Re-insert the order back into the heap
+        console.log("Remove newest bot action triggered!");
+        if (bots.length === 0) {
+            console.log("No bots available to remove.");
+            return null;
         }
-      }
   
-      bots = bots.filter(bot => bot.botId !== botToRemove.botId);
-      assignOrdersToBots(orderHeap, bots); // Reassign orders to available bots
+        const botToRemove = bots.length === 1 ? bots[0] : bots.reduce((newest, bot) => bot.botId > newest.botId ? bot : newest, bots[0]);
+        
+        if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+            console.log("processing to remove bot from handling current order.");
+            // order map for quick lookup
+            if (orderMap.has(botToRemove.currentOrder)) {
+                // Get the order details
+                let order = orders.find(o => o.orderId === botToRemove.currentOrder);
+
+                if (order) {
+                    order.status = 'PENDING';
+                    updateOrderStatus(order.orderId, 'PENDING');
+                    orderHeap.insert(order);
+                    // Remove the entry from the map
+                    orderMap.delete(botToRemove.currentOrder);
+                }
+            }
+        }
+
+        /*
+        if (botToRemove.status === 'BUSY' && botToRemove.currentOrder) {
+            console.log("processing to remove bot from handling current order.");
+            const orderIndex = orderHeap.findIndex(order => order.orderId === botToRemove.currentOrder);
+            console.log("order index: ", orderIndex);
+            if (orderIndex !== -1) {
+                console.log(`changing order ${orderIndex} status`);
+                orderHeap[orderIndex].status = 'PENDING';
+                updateOrderStatus(orderHeap[orderIndex].orderId, 'PENDING'); // Emit WebSocket update if necessary
+
+                orderHeap.insert(orderHeap[orderIndex]); // Re-insert the order back into the heap
+                console.log("order reenterred order queue.");
+            }
+        }
+        */
+    
+        bots = bots.filter(bot => bot.botId !== botToRemove.botId);
+        assignOrdersToBots(orderHeap, bots); // Reassign orders to available bots
   
-      return botToRemove;
+        return botToRemove;
   }
   
   function updateBot(updatedBot) {
