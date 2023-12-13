@@ -22,7 +22,7 @@
             v-for="order in completedOrders" 
             :key="order.orderId"
           >
-            Order #{{ order.orderId }} - {{ order.type }} - {{ humanReadableDateTime(order.createdAt) }}
+            Order #{{ order.orderId }} - {{ order.type }} - {{ humanReadableDateTime(order.createdAt) }} - {{ `Bot ${order.botId}` }}
           </v-list-item>
         </v-list>
       </v-col>
