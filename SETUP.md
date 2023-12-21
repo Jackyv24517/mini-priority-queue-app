@@ -3,7 +3,7 @@
 
 ## Introduction
 
-Provide an overview of Nuxt.js 2, Express.js, and the purpose of this documentation.
+Provide an overview of Nuxt.js 2, Express.js and the purpose of this documentation.
 
 ## Prerequisites
 
@@ -13,13 +13,9 @@ Provide an overview of Nuxt.js 2, Express.js, and the purpose of this documentat
 
 ## Cloning the Repository
 
-### Installing Git
-
-Explain how to install Git if not already installed.
-
 ### Cloning the Project
-
-Provide instructions on how to clone the repository:
+All latest code is commited in 'main' branch
+Instructions on how to clone the repository:
 
 ```bash
 git clone https://github.com/Jackyv24517/se-take-home-assignment.git
@@ -74,14 +70,14 @@ If starting from scratch:
 3. **Configure Express environment file**:
    consider to create a .env file within the backend folder and assign value to the env variables same as below.
    ```bash
-    DB_USERNAME="db_read"
-    DB_PASSWORD="Admin@12345"
-    DB_CLUSTER="dev-order-aws-sg.cfpawyr.mongodb.net"
-    DB_NAME="order_app_dev"
     PORT=4200
     JWT_SECRET="7f80cd225253de55fc1cc8981d35e7343fa5c8b114cfa707a952d6645ea52bcd386428ab2df2326e4e2c2ac10baed1fdb60fc2e35fa309807985f4189ee3b759"
     ```
-
+4. **Configure Express environment file**:
+    To start backend server
+    ```bash
+    npm start
+    ```
 ## Project Structure
 
 This is a MEVN stack app without MongoDB connections. 
