@@ -22,34 +22,35 @@ app.use(cors({
   }));
 
 //connection cred var
+/*
 const username = encodeURIComponent(process.env.DB_USERNAME);
 const password = encodeURIComponent(process.env.DB_PASSWORD);
 const cluster = process.env.DB_CLUSTER;
 const dbname = process.env.DB_NAME;
 
 const uri = `mongodb+srv://${username}:${password}@${cluster}/${dbname}?retryWrites=true&w=majority`;
-
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('Could not connect to MongoDB Atlas', err));
 
-  app.use('/api/auth', authRoutes);
-  app.use('/api', orderRoutes);
-  app.use('/api', botRoutes);
 
 
- /* 
 const port = process.env.PORT || 3200;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
-}); */
-
-const port = process.env.PORT || 3200;
+});
+*/
+const port = process.env.PORT || 4200;
 
 // Update: Use server.listen instead of app.listen
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+
+app.use('/api/auth', authRoutes);
+app.use('/api', orderRoutes);
+app.use('/api', botRoutes);
 
 // Setup WebSocket connections using Socket.IO
 io.on('connection', (socket) => {
